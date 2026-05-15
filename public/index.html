@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex AI</title>
+
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>⚡ Vortex AI</h1>
+                <p class="tagline">Powered by imagination</p>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-section="chat">💬 Chat</button>
+                <button class="nav-btn" data-section="history">📜 History</button>
+                <button class="nav-btn" data-section="settings">⚙️ Settings</button>
+            </nav>
+            <button class="clear-btn" id="clearBtn">🗑️ Clear History</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chat Section -->
+            <section id="chat" class="section active">
+                <div class="chat-header">
+                    <h2>Chat with AI</h2>
+                    <div class="status">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            👋 Welcome to Vortex AI! I'm here to help. What can I do for you?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chatForm">
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Type your message..."
+                            autocomplete="off"
+                        >
+                        <button type="submit" id="sendBtn" class="send-btn">Send</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="section">
+                <div class="section-header">
+                    <h2>Conversation History</h2>
+                </div>
+                <div id="historyContainer" class="history-container">
+                    <p class="empty-state">No history yet. Start chatting!</p>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="setting-group">
+                        <label>AI Model:</label>
+                        <select id="modelSelect">
+                            <option value="openai/gpt-oss-20b:free">GPT OSS 20B</option>
+
+                            <option value="deepseek/deepseek-chat-v3-0324:free">
+                            DeepSeek Chat V3
+                            </option>
+
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">
+                            Llama 3.1 8B
+                            </option>
+
+                            <option value="qwen/qwen-2.5-7b-instruct:free">
+                            Qwen 2.5 7B
+                            </option>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Server URL:</label>
+                        <input type="text" id="serverUrl" placeholder="http://localhost:3000" value="http://localhost:3000">
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Temperature:</label>
+                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                        <span id="tempValue">0.7</span>
+                    </div>
+
+                    <button class="save-btn" id="saveSettings">Save Settings</button>
+                </div>
+
+                <div class="settings-info">
+                    <h3>Setup Instructions:</h3>
+                    <ol>
+                        <li>Download Ollama from <a href="https://ollama.ai" target="_blank">ollama.ai</a></li>
+                        <li>Install and run: <code>ollama serve</code></li>
+                        <li>In another terminal: <code>ollama pull mistral</code></li>
+                        <li>This chat will automatically connect</li>
+                    </ol>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="client.js"></script>
+</body>
+</html>
