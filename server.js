@@ -68,9 +68,8 @@ app.get('/api/health', (req, res) => {
 
 });
 
-app.listen(3000, () => {
+const PORT = process.env.PORT || 3000;
 
-  console.log('VORTEX AI RUNNING');
-  console.log('http://127.0.0.1:3000');
-
+app.listen(PORT, () => {
+console.log(`Running on port ${PORT}`);
 });
