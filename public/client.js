@@ -1,6 +1,6 @@
 // Configuration
 let CONFIG = {
-    SERVER_URL: 'http://127.0.0.1:3000',
+    SERVER_URL: '',
     MODEL: 'openai/gpt-oss-20b:free',
 };
 
