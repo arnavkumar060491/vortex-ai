@@ -183,7 +183,7 @@ function loadSettings() {
 }
 
 function saveSettings() {
-    CONFIG.SERVER_URL = document.getElementById('serverUrl').value || 'http://localhost:3000';
+    CONFIG.SERVER_URL = document.getElementById('serverUrl').value || '';
     CONFIG.MODEL = document.getElementById('modelSelect').value;
 
     localStorage.setItem('aiEngineConfig', JSON.stringify(CONFIG));
