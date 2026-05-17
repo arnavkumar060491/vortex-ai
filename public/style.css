@@ -605,3 +605,222 @@ nav {
         box-shadow: 0 0 16px rgba(0, 212, 255, 0.8);
     }
 }
+
+/* ===== AI MESSAGE ANIMATIONS ===== */
+
+.message {
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* ===== TYPING DOTS ===== */
+
+.typing-dot {
+
+    display: inline-block;
+
+    animation: blink 1.4s infinite;
+
+    font-size: 14px;
+
+    margin-right: 4px;
+
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+
+    0% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+
+}
+
+/* ===== CODE BLOCKS ===== */
+
+pre {
+
+    background: #0f172a;
+
+    padding: 14px;
+
+    border-radius: 12px;
+
+    overflow-x: auto;
+
+    margin-top: 10px;
+
+}
+
+code {
+
+    font-family: Consolas, monospace;
+
+    color: #38bdf8;
+
+}
+
+/* ===== COPY BUTTON ===== */
+
+.message button {
+
+    background: #1e293b;
+
+    border: none;
+
+    color: white;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    margin-top: 10px;
+
+    transition: 0.2s;
+
+}
+
+.message button:hover {
+
+    transform: scale(1.05);
+
+    background: #334155;
+
+}
+
+/* ===== BETTER SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+
+    background: #334155;
+
+    border-radius: 20px;
+
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+
+        width: 75px;
+
+    }
+
+    .nav-btn {
+
+        font-size: 12px;
+
+        padding: 10px;
+
+    }
+
+    .message {
+
+        max-width: 95%;
+
+    }
+
+    .chat-input-container {
+
+        padding: 10px;
+
+    }
+
+    textarea {
+
+        font-size: 16px;
+
+    }
+
+}
+
+body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+}
+
+.message {
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+.message-content {
+
+    background: #1e293b;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    margin-top: 10px;
+
+}
+
+.user-message .message-content {
+
+    background: #2563eb;
+
+}
+
+.typing span {
+
+    width: 8px;
+
+    height: 8px;
+
+    background: white;
+}
