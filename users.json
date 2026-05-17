@@ -1,0 +1,25 @@
+[
+  {
+    "id": "c0435a84-a0a3-4b3b-9a92-d74ab5df3789",
+    "username": "tester 1",
+    "password": "$2b$10$3Plck.yJsOgtxgE4la4eTecJAuJM/UgsBDHGLMNGOAb4c9zZKsXfq",
+    "messages": [
+      {
+        "role": "user",
+        "content": "hello ai"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey there! 👋 I'm Vortex AI—happy to chat, answer questions, or help with anything you need. What's on your mind today?"
+      },
+      {
+        "role": "user",
+        "content": "how are u"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking! 😊 How about you? Anything fun or interesting going on that you'd like to talk about?"
+      }
+    ]
+  }
+]
