@@ -1,154 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vortex AI</title>
 
-    <link rel="icon" type="image/png" href="logo.png">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>⚡ Vortex AI</title>
+
     <link rel="stylesheet" href="style.css">
-    <link
-rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-/>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
+
 <body>
+
     <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <div class="sidebar">
+
             <div class="logo">
+
                 <h1>⚡ Vortex AI</h1>
-                <p class="tagline">Powered by imagination</p>
+
+                <p class="tagline">
+                    Powered by imagination
+                </p>
+
             </div>
+
+            <!-- NEW CHAT -->
+
+            <button
+                class="newchat-btn"
+                id="newChatBtn"
+            >
+                ➕ New Chat
+            </button>
+
+            <!-- NAVIGATION -->
+
             <nav>
-                <button class="nav-btn active" data-section="chat">💬 Chat</button>
-                <button class="nav-btn" data-section="history">📜 History</button>
-                <button class="nav-btn" data-section="settings">⚙️ Settings</button>
-                <button class="nav-btn" data-section="about">   <span>ℹ️</span>About</button>
+
+                <button
+                    class="nav-btn active"
+                    data-section="chat"
+                >
+                    💬 Chat
+                </button>
+
+                <button
+                    class="nav-btn"
+                    data-section="history"
+                >
+                    📜 History
+                </button>
+
+                <button
+                    class="nav-btn"
+                    data-section="settings"
+                >
+                    ⚙️ Settings
+                </button>
+
+                <button
+                    class="nav-btn"
+                    data-section="about"
+                >
+                    ℹ️ About
+                </button>
+
             </nav>
-            <button class="clear-btn" id="clearBtn">🗑️ Clear History</button>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Chat Section -->
-            <section id="chat" class="section active">
+            <!-- CLEAR -->
+
+            <button
+                class="clear-btn"
+                id="clearBtn"
+            >
+                🗑 Clear History
+            </button>
+
+            <!-- SIGN OUT -->
+
+            <button
+                class="signout-btn"
+                onclick="signOut()"
+            >
+                🚪 Sign Out
+            </button>
+
+        </div>
+
+        <!-- ================= MAIN CONTENT ================= -->
+
+        <div class="main-content">
+
+            <!-- ================= CHAT ================= -->
+
+            <section
+                class="section active"
+                id="chat"
+            >
+
                 <div class="chat-header">
+
                     <h2>Chat with AI</h2>
+
                     <div class="status">
-                        <span class="status-dot"></span>
-                        <span id="statusText">Connecting...</span>
+
+                        <div class="status-dot"></div>
+
+                        <span id="statusText">
+                            Connecting...
+                        </span>
+
                     </div>
+
                 </div>
 
-                <div class="chat-messages" id="chatMessages">
+                <!-- CHAT MESSAGES -->
+
+                <div
+                    class="chat-messages"
+                    id="chatMessages"
+                >
+
                     <div class="message ai-message">
+
                         <div class="message-content">
-                            👋 Welcome to Vortex AI! I'm here to help. What can I do for you?
+
+                            👋 Welcome to Vortex AI!<br><br>
+
+                            Ask anything...
+
                         </div>
+
                     </div>
+
                 </div>
+
+                <!-- INPUT -->
 
                 <div class="chat-input-area">
+
                     <form id="chatForm">
+
                         <input
                             type="text"
                             id="messageInput"
                             placeholder="Type your message..."
                             autocomplete="off"
                         >
-                        <button type="submit" id="sendBtn" class="send-btn">Send</button>
+
+                        <button
+                            type="submit"
+                            class="send-btn"
+                            id="sendBtn"
+                        >
+                            ➤
+                        </button>
+
                     </form>
+
                 </div>
+
             </section>
 
-            <!-- History Section -->
-            <section id="history" class="section">
+            <!-- ================= HISTORY ================= -->
+
+            <section
+                class="section"
+                id="history"
+            >
+
                 <div class="section-header">
-                    <h2>Conversation History</h2>
+
+                    <h2>
+                        📜 Chat History
+                    </h2>
+
                 </div>
-                <div id="historyContainer" class="history-container">
-                    <p class="empty-state">No history yet. Start chatting!</p>
+
+                <div
+                    class="history-container"
+                    id="historyContainer"
+                >
+
+                    <p class="empty-state">
+
+                        No history yet.
+
+                    </p>
+
                 </div>
+
             </section>
 
-            <!-- Settings Section -->
-            <section id="settings" class="section">
+            <!-- ================= SETTINGS ================= -->
+
+            <section
+                class="section"
+                id="settings"
+            >
+
                 <div class="section-header">
-                    <h2>Settings</h2>
+
+                    <h2>
+                        ⚙️ Settings
+                    </h2>
+
                 </div>
+
                 <div class="settings-container">
+
+                    <!-- MODEL -->
+
                     <div class="setting-group">
-                        <label>AI Model:</label>
+
+                        <label>
+                            AI Model
+                        </label>
+
                         <select id="modelSelect">
-                            <option value="openai/gpt-oss-20b:free">GPT OSS 20B</option>
 
-                            <option value="deepseek/deepseek-chat-v3-0324:free">
-                            DeepSeek Chat V3
+                            <option value="openai/gpt-oss-120b:free">
+                                GPT OSS 120B
                             </option>
 
-                            <option value="meta-llama/llama-3.1-8b-instruct:free">
-                            Llama 3.1 8B
+                            <option value="openai/gpt-oss-20b:free">
+                                GPT OSS 20B
                             </option>
 
-                            <option value="qwen/qwen-2.5-7b-instruct:free">
-                            Qwen 2.5 7B
-                            </option>
+                        </select>
+
                     </div>
+
+                    <!-- SERVER -->
 
                     <div class="setting-group">
-                        <label>Server URL:</label>
-                        <input type="text" id="serverUrl" placeholder="http://localhost:3000" value="http://localhost:3000">
+
+                        <label>
+                            Server URL
+                        </label>
+
+                        <input
+                            type="text"
+                            id="serverUrl"
+                            placeholder="Server URL"
+                        >
+
                     </div>
+
+                    <!-- TEMPERATURE -->
 
                     <div class="setting-group">
-                        <label>Temperature:</label>
-                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
-                        <span id="tempValue">0.7</span>
+
+                        <label>
+                            Creativity
+                        </label>
+
+                        <input
+                            type="range"
+                            id="temperature"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.7"
+                        >
+
+                        <span id="tempValue">
+                            0.7
+                        </span>
+
                     </div>
 
-                    <button class="save-btn" id="saveSettings">Save Settings</button>
+                    <!-- SAVE -->
+
+                    <button
+                        class="save-btn"
+                        id="saveSettings"
+                    >
+                        💾 Save Settings
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- ================= ABOUT ================= -->
+
+            <section
+                class="section"
+                id="about"
+            >
+
+                <div class="section-header">
+
+                    <h2>
+                        ℹ️ About
+                    </h2>
+
                 </div>
 
                 <div class="settings-info">
-                    <h3>Setup Instructions:</h3>
-                    <ol>
-                        <li>Download Ollama from <a href="https://ollama.ai" target="_blank">ollama.ai</a></li>
-                        <li>Install and run: <code>ollama serve</code></li>
-                        <li>In another terminal: <code>ollama pull mistral</code></li>
-                        <li>This chat will automatically connect</li>
-                    </ol>
+
+                    <h3>
+                        ⚡ Vortex AI
+                    </h3>
+
+                    <p>
+
+                        Your futuristic AI assistant powered by OpenRouter.
+
+                    </p>
+
+                    <br>
+
+                    <ul>
+
+                        <li>
+                            🤖 AI Chat
+                        </li>
+
+                        <li>
+                            💾 Saved History
+                        </li>
+
+                        <li>
+                            🔐 Account System
+                        </li>
+
+                        <li>
+                            ⚡ Fast Responses
+                        </li>
+
+                        <li>
+                            🎨 Modern UI
+                        </li>
+
+                    </ul>
+
                 </div>
+
             </section>
-            <section id="about" class="section">
 
-    <div class="settings-panel">
-        <h2>About Vortex AI</h2>
+        </div>
 
-        <p>
-            Vortex AI is a modern AI assistant built using:
-        </p>
-
-        <ul style="margin-top:15px; line-height:2;">
-            <li>⚡ Node.js</li>
-            <li>⚡ Express.js</li>
-            <li>⚡ OpenRouter API</li>
-            <li>⚡ Multiple AI Models Made By Arnav</li>
-            </ul>
-
-            <p style="margin-top:20px;">
-                Created by Arnav Dhiman 🚀
-            </p>
-            </div>
-
-        </section>
-        </main>
     </div>
 
     <script src="client.js"></script>
+
 </body>
+
 </html>

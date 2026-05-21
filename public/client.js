@@ -1,15 +1,25 @@
+// ================= AUTH =================
+
+let currentUser =
+    localStorage.getItem(
+        'vortexUser'
+    );
+
+if (!currentUser) {
+
+    window.location.href =
+        '/auth.html';
+
+}
 
 // ================= CONFIG =================
 
 let CONFIG = {
 
-    MODEL: 'openai/gpt-oss-120b:free',
+    MODEL:
+        'openai/gpt-oss-120b:free',
 
 };
-
-// ================= USER =================
-
-let currentUser = null;
 
 // ================= DOM =================
 
@@ -48,15 +58,20 @@ const statusDot =
         '.status-dot'
     );
 
+const historyContainer =
+    document.getElementById(
+        'historyContainer'
+    );
+
 // ================= INIT =================
 
 document.addEventListener(
     'DOMContentLoaded',
     () => {
 
-        autoLogin();
-
         checkServerStatus();
+
+        loadHistory();
 
         setInterval(
             checkServerStatus,
@@ -72,182 +87,111 @@ document.addEventListener(
             'click',
             clearChat
         );
-        createLogoutButton();
+
+        setupTabs();
+
+        setupLogout();
 
     }
 );
 
-// ================= AUTO LOGIN =================
+// ================= TABS =================
 
-function autoLogin() {
+function setupTabs() {
 
-    const savedUser =
-        localStorage.getItem(
-            'vortexUser'
+    const navBtns =
+        document.querySelectorAll(
+            '.nav-btn'
         );
 
-    if (savedUser) {
-
-        currentUser =
-            JSON.parse(savedUser);
-
-        addSystemMessage(
-            `👋 Welcome back ${currentUser.username}`
+    const sections =
+        document.querySelectorAll(
+            '.section'
         );
 
-        loadHistory();
+    navBtns.forEach(btn => {
 
-    } else {
+        btn.addEventListener(
+            'click',
+            () => {
 
-        showAuthMenu();
+                const sectionId =
+                    btn.dataset.section;
 
-    }
+                navBtns.forEach(
+                    b =>
+                        b.classList.remove(
+                            'active'
+                        )
+                );
+
+                btn.classList.add(
+                    'active'
+                );
+
+                sections.forEach(
+                    sec =>
+                        sec.classList.remove(
+                            'active'
+                        )
+                );
+
+                const activeSection =
+                    document.getElementById(
+                        sectionId
+                    );
+
+                if (activeSection) {
+
+                    activeSection.classList.add(
+                        'active'
+                    );
+
+                }
+
+            }
+        );
+
+    });
 
 }
 
-// ================= AUTH MENU =================
+// ================= LOGOUT =================
 
-function showAuthMenu() {
+function setupLogout() {
 
-    const choice = prompt(
-        'Type: login OR signup'
+    const logoutBtn =
+        document.getElementById(
+            'logoutBtn'
+        );
+
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener(
+        'click',
+        signOut
     );
-
-    if (!choice) return;
-
-    if (
-        choice.toLowerCase() ===
-        'signup'
-    ) {
-
-        signup();
-
-    } else {
-
-        login();
-
-    }
 
 }
 
-// ================= SIGNUP =================
+function signOut() {
 
-async function signup() {
-
-    const username = prompt(
-        'Choose username'
+    localStorage.removeItem(
+        'vortexUser'
     );
 
-    const password = prompt(
-        'Choose password'
-    );
-
-    const response = await fetch(
-        '/api/signup',
-        {
-
-            method: 'POST',
-
-            headers: {
-                'Content-Type':
-                    'application/json',
-            },
-
-            body: JSON.stringify({
-                username,
-                password,
-            }),
-
-        }
-    );
-
-    const data =
-        await response.json();
-
-    if (data.success) {
-
-        alert('✅ Account created');
-
-        login();
-
-    } else {
-
-        alert(data.error);
-
-    }
-
-}
-
-// ================= LOGIN =================
-
-async function login() {
-
-    const username = prompt(
-        'Username'
-    );
-
-    const password = prompt(
-        'Password'
-    );
-
-    const response = await fetch(
-        '/api/login',
-        {
-
-            method: 'POST',
-
-            headers: {
-                'Content-Type':
-                    'application/json',
-            },
-
-            body: JSON.stringify({
-                username,
-                password,
-            }),
-
-        }
-    );
-
-    const data =
-        await response.json();
-
-    if (data.success) {
-
-        currentUser = data.user;
-
-        localStorage.setItem(
-            'vortexUser',
-            JSON.stringify(currentUser)
-        );
-
-        addSystemMessage(
-            `✅ Logged in as ${currentUser.username}`
-        );
-
-        loadHistory();
-
-    } else {
-
-        alert(data.error);
-
-    }
+    window.location.href =
+        '/auth.html';
 
 }
 
 // ================= SEND MESSAGE =================
 
-async function handleSendMessage(e) {
+async function handleSendMessage(
+    e
+) {
 
     e.preventDefault();
-
-    if (!currentUser) {
-
-        alert('Login first');
-
-        return;
-
-    }
 
     const message =
         messageInput.value.trim();
@@ -273,16 +217,18 @@ async function handleSendMessage(e) {
                 method: 'POST',
 
                 headers: {
+
                     'Content-Type':
                         'application/json',
+
                 },
 
                 body: JSON.stringify({
 
-                    message,
-
                     username:
-                        currentUser.username,
+                        currentUser,
+
+                    message,
 
                     model:
                         CONFIG.MODEL,
@@ -303,6 +249,8 @@ async function handleSendMessage(e) {
                 'ai',
                 data.aiResponse
             );
+
+            loadHistory();
 
         } else {
 
@@ -326,50 +274,143 @@ async function handleSendMessage(e) {
 
 }
 
-// ================= LOAD HISTORY =================
+// ================= DISPLAY =================
 
-async function loadHistory() {
+function displayMessage(
+    role,
+    content
+) {
 
-    const response = await fetch(
-        '/api/history',
-        {
-
-            method: 'POST',
-
-            headers: {
-                'Content-Type':
-                    'application/json',
-            },
-
-            body: JSON.stringify({
-                username:
-                    currentUser.username,
-            }),
-
-        }
-    );
-
-    const data =
-        await response.json();
-
-    if (!data.success) return;
-
-    chatMessages.innerHTML = '';
-
-    data.messages.forEach(msg => {
-
-        displayMessage(
-            msg.role === 'assistant'
-                ? 'ai'
-                : 'user',
-            msg.content
+    const messageDiv =
+        document.createElement(
+            'div'
         );
 
-    });
+    messageDiv.className =
+        `message ${role}-message`;
+
+    const contentDiv =
+        document.createElement(
+            'div'
+        );
+
+    contentDiv.className =
+        'message-content';
+
+    contentDiv.textContent =
+        content;
+
+    messageDiv.appendChild(
+        contentDiv
+    );
+
+    chatMessages.appendChild(
+        messageDiv
+    );
+
+    chatMessages.scrollTop =
+        chatMessages.scrollHeight;
 
 }
 
-// ================= CLEAR CHAT =================
+// ================= TYPING =================
+
+function createTypingIndicator() {
+
+    const typing =
+        document.createElement(
+            'div'
+        );
+
+    typing.className =
+        'message ai-message';
+
+    typing.innerHTML = `
+
+        <div class="message-content">
+
+            🤖 Thinking...
+
+        </div>
+
+    `;
+
+    chatMessages.appendChild(
+        typing
+    );
+
+    return typing;
+
+}
+
+// ================= HISTORY =================
+
+async function loadHistory() {
+
+    try {
+
+        const response =
+            await fetch(
+                '/api/history',
+                {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                    },
+
+                    body: JSON.stringify({
+
+                        username:
+                            currentUser,
+
+                    }),
+
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!data.success)
+            return;
+
+        historyContainer.innerHTML =
+            '';
+
+        chatMessages.innerHTML =
+            '';
+
+        data.messages.forEach(
+            msg => {
+
+                displayMessage(
+
+                    msg.role ===
+                        'assistant'
+                        ? 'ai'
+                        : 'user',
+
+                    msg.content
+
+                );
+
+            }
+        );
+
+    } catch (err) {
+
+        console.log(err);
+
+    }
+
+}
+
+// ================= CLEAR =================
 
 async function clearChat() {
 
@@ -378,34 +419,36 @@ async function clearChat() {
         method: 'POST',
 
         headers: {
+
             'Content-Type':
                 'application/json',
+
         },
 
         body: JSON.stringify({
+
             username:
-                currentUser.username,
+                currentUser,
+
         }),
 
     });
 
-    chatMessages.innerHTML = '';
-
-    addSystemMessage(
-        '🧹 Chat cleared'
-    );
+    chatMessages.innerHTML =
+        '';
 
 }
 
-// ================= STATUS =================
+// ================= SERVER STATUS =================
 
 async function checkServerStatus() {
 
     try {
 
-        const response = await fetch(
-            '/api/health'
-        );
+        const response =
+            await fetch(
+                '/api/health'
+            );
 
         const data =
             await response.json();
@@ -430,187 +473,14 @@ async function checkServerStatus() {
 
 }
 
-// ================= MESSAGE UI =================
+// ================= NEW CHAT =================
 
-function displayMessage(
-    role,
-    content
-) {
+function newChat() {
 
-    const messageDiv =
-        document.createElement('div');
-
-    messageDiv.className =
-        `message ${role}-message`;
-
-    const contentDiv =
-        document.createElement('div');
-
-    contentDiv.className =
-        'message-content';
-
-    contentDiv.textContent =
-        content;
-
-    messageDiv.appendChild(
-        contentDiv
-    );
-
-    chatMessages.appendChild(
-        messageDiv
-    );
-
-    chatMessages.scrollTop =
-        chatMessages.scrollHeight;
+    chatMessages.innerHTML = '';
 
 }
 
-// ================= SYSTEM MESSAGE =================
-
-function addSystemMessage(text) {
-
-    const div =
-        document.createElement('div');
-
-    div.className =
-        'message ai-message';
-
-    div.innerHTML = `
-        <div class="message-content">
-            ${text}
-        </div>
-    `;
-
-    chatMessages.appendChild(div);
-
-}
-
-// ================= TYPING =================
-
-function createTypingIndicator() {
-
-    const typing =
-        document.createElement('div');
-
-    typing.className =
-        'message ai-message typing';
-
-    typing.innerHTML = `
-        <div class="message-content">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    `;
-
-    chatMessages.appendChild(
-        typing
-    );
-
-    return typing;
-
-}
-
-console.log('🚀 Vortex AI Loaded');
-
-// ================= TABS =================
-
-const navBtns =
-    document.querySelectorAll(
-        '.nav-btn'
-    );
-
-const sections =
-    document.querySelectorAll(
-        '.section'
-    );
-
-navBtns.forEach(btn => {
-
-    btn.addEventListener(
-        'click',
-        () => {
-
-            const sectionId =
-                btn.dataset.section;
-
-            // buttons
-            navBtns.forEach(b =>
-                b.classList.remove(
-                    'active'
-                )
-            );
-
-            btn.classList.add(
-                'active'
-            );
-
-            // sections
-            sections.forEach(sec => {
-
-                sec.classList.remove(
-                    'active'
-                );
-
-            });
-
-            const activeSection =
-                document.getElementById(
-                    sectionId
-                );
-
-            if (activeSection) {
-
-                activeSection.classList.add(
-                    'active'
-                );
-
-            }
-
-        }
-    );
-
-});
-// ================= LOGOUT =================
-
-function createLogoutButton() {
-
-    const sidebar =
-        document.querySelector(
-            '.sidebar'
-        );
-
-    const logoutBtn =
-        document.createElement(
-            'button'
-        );
-
-    logoutBtn.className =
-        'nav-btn';
-
-    logoutBtn.innerHTML =
-        '🚪 Logout';
-
-    logoutBtn.style.marginTop =
-        '10px';
-
-    logoutBtn.addEventListener(
-        'click',
-        logout
-    );
-
-    sidebar.appendChild(
-        logoutBtn
-    );
-
-}
-
-function logout() {
-
-    localStorage.removeItem(
-        'vortexUser'
-    );
-
-    location.reload();
-
-}
+console.log(
+    '🚀 Vortex AI Loaded'
+);

@@ -1,14 +1,15 @@
-const express = require('express');
-const cors = require('cors');
+const express =
+    require('express');
+
+const cors =
+    require('cors');
+
+const fs =
+    require('fs');
+
 require('dotenv').config();
 
-const fs = require('fs-extra');
-const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-
 const app = express();
-
-// ================= MIDDLEWARE =================
 
 app.use(cors());
 
@@ -16,111 +17,85 @@ app.use(express.json());
 
 app.use(express.static('public'));
 
-// ================= USERS FILE =================
+// ================= USERS =================
 
-const USERS_FILE = './users.json';
+const USERS_FILE =
+    './users.json';
 
-// ================= LOAD USERS =================
+function loadUsers() {
 
-async function loadUsers() {
+    if (!fs.existsSync(USERS_FILE)) {
 
-    try {
-
-        return await fs.readJson(
-            USERS_FILE
+        fs.writeFileSync(
+            USERS_FILE,
+            '{}'
         );
-
-    } catch {
-
-        return [];
 
     }
 
-}
+    return JSON.parse(
 
-// ================= SAVE USERS =================
+        fs.readFileSync(
+            USERS_FILE,
+            'utf8'
+        )
 
-async function saveUsers(users) {
-
-    await fs.writeJson(
-        USERS_FILE,
-        users,
-        { spaces: 2 }
     );
 
 }
 
-// ================= HEALTH =================
+function saveUsers(users) {
 
-app.get('/api/health', (req, res) => {
+    fs.writeFileSync(
 
-    res.json({
+        USERS_FILE,
 
-        status: 'running',
+        JSON.stringify(
+            users,
+            null,
+            2
+        )
 
-        model:
-            'openai/gpt-oss-120b:free',
+    );
 
-    });
-
-});
+}
 
 // ================= SIGNUP =================
 
-app.post('/api/signup', async (req, res) => {
-
-    try {
+app.post(
+    '/api/signup',
+    (req, res) => {
 
         const {
             username,
-            password,
+            password
         } = req.body;
 
         const users =
-            await loadUsers();
+            loadUsers();
 
-        const exists =
-            users.find(
-                u =>
-                    u.username ===
-                    username
-            );
-
-        if (exists) {
+        if (users[username]) {
 
             return res.json({
 
                 success: false,
 
                 error:
-                    'Username already exists',
+                    'User already exists',
 
             });
 
         }
 
-        const hashedPassword =
-            await bcrypt.hash(
-                password,
-                10
-            );
+        users[username] = {
 
-        const newUser = {
+            password,
 
-            id: uuidv4(),
-
-            username,
-
-            password:
-                hashedPassword,
-
-            messages: [],
+            history: [],
 
         };
 
-        users.push(newUser);
-
-        await saveUsers(users);
+        saveUsers(users);
 
         res.json({
 
@@ -128,42 +103,25 @@ app.post('/api/signup', async (req, res) => {
 
         });
 
-    } catch (err) {
-
-        console.log(err);
-
-        res.status(500).json({
-
-            success: false,
-
-            error: err.message,
-
-        });
-
     }
-
-});
+);
 
 // ================= LOGIN =================
 
-app.post('/api/login', async (req, res) => {
-
-    try {
+app.post(
+    '/api/login',
+    (req, res) => {
 
         const {
             username,
-            password,
+            password
         } = req.body;
 
         const users =
-            await loadUsers();
+            loadUsers();
 
         const user =
-            users.find(
-                u =>
-                    u.username ===
-                    username
-            );
+            users[username];
 
         if (!user) {
 
@@ -178,13 +136,10 @@ app.post('/api/login', async (req, res) => {
 
         }
 
-        const valid =
-            await bcrypt.compare(
-                password,
-                user.password
-            );
-
-        if (!valid) {
+        if (
+            user.password !==
+            password
+        ) {
 
             return res.json({
 
@@ -201,57 +156,170 @@ app.post('/api/login', async (req, res) => {
 
             success: true,
 
-            user: {
-
-                id: user.id,
-
-                username:
-                    user.username,
-
-            },
-
-        });
-
-    } catch (err) {
-
-        console.log(err);
-
-        res.status(500).json({
-
-            success: false,
-
-            error: err.message,
-
         });
 
     }
-
-});
+);
 
 // ================= CHAT =================
 
-app.post('/api/chat', async (req, res) => {
+app.post(
+    '/api/chat',
+    async (req, res) => {
 
-    try {
+        try {
 
-        const {
-            message,
-            username,
-        } = req.body;
+            const {
+                username,
+                message,
+                model
+            } = req.body;
 
-        const model =
-            req.body.model ||
-            'openai/gpt-oss-120b:free';
+            const users =
+                loadUsers();
+
+            if (
+                !users[username]
+            ) {
+
+                return res.json({
+
+                    success: false,
+
+                    error:
+                        'User not found',
+
+                });
+
+            }
+
+            if (
+                !users[username]
+                    .history
+            ) {
+
+                users[
+                    username
+                ].history = [];
+
+            }
+
+            users[
+                username
+            ].history.push({
+
+                role: 'user',
+
+                content:
+                    message,
+
+            });
+
+            const response =
+                await fetch(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    {
+
+                        method:
+                            'POST',
+
+                        headers: {
+
+                            Authorization:
+                                `Bearer ${process.env.OPENROUTER_API_KEY}`,
+
+                            'Content-Type':
+                                'application/json',
+
+                        },
+
+                        body: JSON.stringify(
+                            {
+
+                                model:
+                                    model ||
+                                    'openai/gpt-oss-120b:free',
+
+                                messages:
+                                    users[
+                                        username
+                                    ]
+                                        .history,
+
+                            }
+                        ),
+
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            console.log(
+                data
+            );
+
+            const aiMessage =
+                data.choices?.[0]
+                    ?.message
+                    ?.content ||
+                'No response';
+
+            users[
+                username
+            ].history.push({
+
+                role:
+                    'assistant',
+
+                content:
+                    aiMessage,
+
+            });
+
+            saveUsers(users);
+
+            res.json({
+
+                success: true,
+
+                aiResponse:
+                    aiMessage,
+
+            });
+
+        } catch (err) {
+
+            console.log(err);
+
+            res.status(500).json({
+
+                success: false,
+
+                error:
+                    err.message,
+
+            });
+
+        }
+
+    }
+);
+
+// ================= HISTORY =================
+
+app.post(
+    '/api/history',
+    (req, res) => {
+
+        const { username } =
+            req.body;
 
         const users =
-            await loadUsers();
+            loadUsers();
 
         const user =
-            users.find(
-                u =>
-                    u.username ===
-                    username
-            );
+            users[username];
 
         if (!user) {
 
@@ -259,237 +327,76 @@ app.post('/api/chat', async (req, res) => {
 
                 success: false,
 
-                error:
-                    'User not found',
+                messages: [],
 
             });
 
         }
-
-        // SAVE USER MESSAGE
-        user.messages.push({
-
-            role: 'user',
-
-            content: message,
-
-        });
-
-        // LIMIT MEMORY
-        if (
-            user.messages.length > 20
-        ) {
-
-            user.messages =
-                user.messages.slice(
-                    -20
-                );
-
-        }
-
-        const response = await fetch(
-            'https://openrouter.ai/api/v1/chat/completions',
-            {
-
-                method: 'POST',
-
-                headers: {
-
-                    Authorization:
-                        `Bearer ${process.env.OPENROUTER_API_KEY}`,
-
-                    'Content-Type':
-                        'application/json',
-
-                },
-
-                body: JSON.stringify({
-
-                    model,
-
-                    max_tokens: 200,
-
-                    temperature: 0.7,
-
-                    messages: [
-
-                        {
-
-                            role:
-                                'system',
-
-                            content:
-                                'You are Vortex AI. Remember previous messages and talk naturally.',
-
-                        },
-
-                        ...user.messages,
-
-                    ],
-
-                }),
-
-            }
-        );
-
-        const data =
-            await response.json();
-
-        console.log(data);
-
-        const aiMessage =
-            data.choices?.[0]
-                ?.message?.content ||
-            'No response';
-
-        // SAVE AI MESSAGE
-        user.messages.push({
-
-            role: 'assistant',
-
-            content: aiMessage,
-
-        });
-
-        await saveUsers(users);
 
         res.json({
 
             success: true,
 
-            aiResponse:
-                aiMessage,
+            messages:
+                user.history || [],
 
         });
-
-    } catch (err) {
-
-        console.log(err);
-
-        res.status(500).json({
-
-            success: false,
-
-            error: err.message,
-
-        });
-
-    }
-
-});
-
-// ================= GET HISTORY =================
-
-app.post(
-    '/api/history',
-    async (req, res) => {
-
-        try {
-
-            const {
-                username,
-            } = req.body;
-
-            const users =
-                await loadUsers();
-
-            const user =
-                users.find(
-                    u =>
-                        u.username ===
-                        username
-                );
-
-            if (!user) {
-
-                return res.json({
-
-                    success: false,
-
-                });
-
-            }
-
-            res.json({
-
-                success: true,
-
-                messages:
-                    user.messages,
-
-            });
-
-        } catch (err) {
-
-            res.status(500).json({
-
-                success: false,
-
-                error:
-                    err.message,
-
-            });
-
-        }
 
     }
 );
 
-// ================= CLEAR CHAT =================
+// ================= CLEAR =================
 
 app.post(
     '/api/clear',
-    async (req, res) => {
+    (req, res) => {
 
-        try {
+        const { username } =
+            req.body;
 
-            const {
-                username,
-            } = req.body;
+        const users =
+            loadUsers();
 
-            const users =
-                await loadUsers();
+        if (
+            users[username]
+        ) {
 
-            const user =
-                users.find(
-                    u =>
-                        u.username ===
-                        username
-                );
+            users[
+                username
+            ].history = [];
 
-            if (user) {
-
-                user.messages = [];
-
-                await saveUsers(
-                    users
-                );
-
-            }
-
-            res.json({
-
-                success: true,
-
-            });
-
-        } catch (err) {
-
-            res.status(500).json({
-
-                success: false,
-
-                error:
-                    err.message,
-
-            });
+            saveUsers(users);
 
         }
+
+        res.json({
+
+            success: true,
+
+        });
 
     }
 );
 
-// ================= START SERVER =================
+// ================= HEALTH =================
+
+app.get(
+    '/api/health',
+    (req, res) => {
+
+        res.json({
+
+            status: 'running',
+
+            model:
+                'GPT OSS 120B',
+
+        });
+
+    }
+);
+
+// ================= START =================
 
 const PORT =
     process.env.PORT || 3000;
@@ -497,7 +404,7 @@ const PORT =
 app.listen(PORT, () => {
 
     console.log(
-        `🚀 Vortex AI Running on ${PORT}`
+        `Running on port ${PORT}`
     );
 
 });
