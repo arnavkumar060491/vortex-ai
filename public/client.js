@@ -484,3 +484,18 @@ function newChat() {
 console.log(
     '🚀 Vortex AI Loaded'
 );
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker
+            .register("/service-worker.js")
+            .then(() => {
+
+                console.log("✅ PWA Ready");
+
+            });
+
+    });
+
+}
